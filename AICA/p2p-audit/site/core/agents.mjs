@@ -57,8 +57,9 @@ export async function requestAiDraft(endpoint,token,payload,{signal}={}) {
   const url=new URL(endpoint),local=['localhost','127.0.0.1','[::1]'].includes(url.hostname);
   if(url.protocol!=='https:'&&!(local&&url.protocol==='http:'))throw new Error('Use HTTPS for an AI gateway, or localhost for development.');
   if(url.username||url.password||url.search||url.hash)throw new Error('Gateway URLs must not contain credentials, query strings or fragments.');
-  if(!token.trim())throw new Error('Enter your gateway access token. Provider API keys belong on the server.');
-  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({finding:payload}),signal,credentials:'omit',redirect:'error'});
+  if(!local&&!token.trim())throw new Error('Enter your gateway access token. Provider API keys belong on the server.');
+  const headers={'Content-Type':'application/json'};if(token.trim())headers.Authorization=`Bearer ${token.trim()}`;
+  let response;try{response=await fetch(url,{method:'POST',headers,body:JSON.stringify({finding:payload}),signal,credentials:'omit',redirect:'error'});}catch(error){if(error.name==='AbortError')throw error;throw new Error(local?'Cannot reach the AI drafting gateway. Run Open-AICA-Demo.cmd to start it, then try again.':'Cannot reach the AI drafting gateway. Check the endpoint and its allowed website origin.');}
   if(!response.ok)throw new Error(`AI gateway rejected the request (${response.status}). No draft was applied.`);
   const text=await response.text();if(text.length>30000)throw new Error('AI gateway response exceeds the allowed size.');
   return validateAiDraft(JSON.parse(text),payload);

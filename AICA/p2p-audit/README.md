@@ -56,25 +56,13 @@ The browser executes specialists sequentially to make the trace bounded and repr
 
 Changing an extract, control scope, tolerance or rerunning clears old results and reviews. Editing a reviewed narrative clears its current decision. Optional AI output also clears the current decision and cannot alter the condition, control, amount or evidence. Review history remains in the local workpaper. Human decisions require a reviewer name and basis. Accepted-findings HTML excludes pending, dismissed and further-evidence items. All-decisions CSV and draft HTML remain available. HTML text is escaped; CSV formula-like cells are neutralized.
 
-## Optional model drafting
+## Compass model drafting
 
-The core app works without this component. `gateway/server.mjs` is a separate Node server template using the Responses API with strict structured output. Provider requests use `store: false`; that is not a guarantee of zero retention under every provider/account policy. Consult your organization's approved data handling before use.
+Run `npm run gateway` to start `gateway/compass-draft.mjs` on port 8780. The original workspace launcher starts both drafting and chat automatically. Drafting uses Core42 Compass chat completions and the same server-only `KUST_PROD_KUIAA` and `COMPASS_MODELS` settings as chat. It never falls back to another provider. The old OpenAI server entry point remains available only for explicit legacy use.
 
-Set these environment variables on the gateway host using its secret management; do not commit them or place them in frontend files:
+For the local demo, Configure AI drafting fills `http://127.0.0.1:8780/draft`. Leave the gateway token blank and save for this session unless your local server explicitly configures a token. Local mode binds to loopback and restricts allowed browser origins. Provider API keys belong in server environment settings, never in the browser token field. Hosted mode requires a strong gateway token and exact HTTPS origins; use the Compass hosting configuration for a separate draft service, starting `node gateway/compass-draft.mjs` with the host's PORT.
 
-- `OPENAI_API_KEY`: provider credential, server only.
-- `OPENAI_MODEL`: model available to your account that supports structured outputs.
-- `GATEWAY_TOKEN`: a strong, session-scoped gateway credential.
-- `ALLOWED_ORIGIN`: exact frontend origin, e.g. `http://127.0.0.1:8773` or `https://your-org.github.io` (no path/trailing slash).
-- `GATEWAY_PORT`: optional, defaults to 8780.
-
-Run `npm run gateway`. For local testing, enter `http://127.0.0.1:8780/draft` and the gateway token in Configure AI drafting. For deployed use, host this gateway separately behind HTTPS and organizational authentication. The supplied shared-token template is for a limited demo, not a full enterprise access-control solution. It binds to localhost and expects a secured reverse proxy when used remotely. CORS origin checks do not replace user authorization.
-
-Each finding request requires explicit in-app confirmation and exposes its exact payload. It sends the control identifier, current narrative, questions and evidence aliases. Raw extracts, source IDs and amounts are excluded by construction from the initial rule templates, but manually edited narratives can contain sensitive facts: inspect them before sending. No automatic model request occurs. Client and server validate the response schema, evidence aliases and absence of new numeric claims; human review is still needed for semantic accuracy. The gateway restricts origins, uses bearer authentication, caps concurrent requests and applies per-address request limits. No request content or provider credential is logged.
-
-Live model calls were not used for validation. Gateway tests use a mocked provider response to verify the request contract, origin/authentication handling and response gate.
-
-References: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses), [Responses migration and storage](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+Each request previews its exact finding payload and requires explicit in-app confirmation. It sends the control, current narrative, follow-up questions and anonymous evidence aliases. Check edited narratives for sensitive details. The server and browser validate the draft fields, preserve evidence aliases and reject new numeric claims. Drafting changes only impact, recommendation and questions, clears the current review decision and never changes control results or amounts. A named human review remains required. Requests are bounded and rate limited. Health: `http://127.0.0.1:8780/health`.
 
 ## Compass RAG chatbot
 
@@ -84,7 +72,7 @@ From this original workspace, run `npm run compass` to load the existing KU `.en
 
 The public chat gateway URL is initially blank in `site/chat-config.json`. The frontend alone cannot run model calls or access a local `.env`; provider credentials and the gateway must be deployed separately. Docker deployment is provided. The gateway permits no automatic provider retries or fallback and has request, context and concurrency limits.
 
-Live synthetic Compass checks verified both a tool-guide explanation and a current-run summary using the configured model. Legacy optional narrative drafting remains a separate OpenAI gateway component; choosing Compass chat does not silently route calls to it.
+Live synthetic Compass checks verified both a tool-guide explanation and a current-run summary using the configured model. Narrative drafting and chatbot generation both use separately started Compass gateways.
 
 ## GitHub Pages deployment, when ready
 

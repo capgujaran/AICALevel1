@@ -1,5 +1,5 @@
 {
   "name": "aica-purchase-to-payment-audit", "version": "1.0.0", "private": true, "type": "module",
-  "scripts": { "test": "node --test --experimental-test-isolation=none tests/*.test.mjs", "serve": "node scripts/serve.mjs", "build": "node scripts/build.mjs", "gateway": "node gateway/server.mjs", "compass": "node gateway/compass.mjs" },
+  "scripts": { "test": "node --test --experimental-test-isolation=none tests/*.test.mjs", "serve": "node scripts/serve.mjs", "build": "node scripts/build.mjs", "gateway": "node gateway/compass-draft.mjs", "compass": "node gateway/compass.mjs" },
   "engines": { "node": ">=22.8" }
 }
