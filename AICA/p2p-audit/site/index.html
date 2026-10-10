@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="AICA purchase-to-payment audit lab: evidence-linked exceptions, a visible agent workflow and human-reviewed reporting.">
+  <meta name="theme-color" content="#012060"><title>AICA · Purchase-to-payment Audit Lab</title>
+  <link rel="icon" href="./assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip" href="#content">Skip to workspace</a>
+  <aside class="sidebar">
+    <a class="brand" href="#overview" aria-label="AICA Audit Lab home"><img src="./assets/mark.svg" alt="" width="42" height="42"><span><strong>AICA</strong><small>Audit Lab</small></span></a>
+    <p class="sidebar-intro">Purchase to payment<br><span>Day 3 group project</span></p>
+    <nav aria-label="Workspace"><button data-view="overview" class="active">Overview</button><button data-view="evidence">Evidence room</button><button data-view="exceptions">Exceptions <span id="nav-count">0</span></button><button data-view="agents">Agent framework</button><button data-view="report">Review & report</button><button data-view="guide">Demo guide</button></nav>
+    <div class="sidebar-bottom"><span class="local-dot"></span><strong>Local workspace</strong><p>Core checks stay in your browser.<br>Uploads are held in memory.</p><button class="text-button" id="gateway-settings">Configure AI drafting</button></div>
+    <div class="course-strip">AI in ICAI <span>Level 1</span></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><div><span class="breadcrumb">AICA / Audit Lab</span><span id="dataset-label" class="dataset-label">Synthetic demonstration</span></div><div class="top-actions"><button class="button secondary small" id="reset-demo">Load demo</button><button class="button primary small" id="run-top">Run audit <span aria-hidden="true">↗</span></button><button class="button danger small" id="stop-run" hidden>Stop audit</button></div></header>
+    <main id="content" tabindex="-1"></main>
+    <footer class="workspace-footer"><span>AICA-themed learning prototype · Inspired by KU Internal Audit workflows</span><span>Evidence first. Human judgment always.</span></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="settings-dialog"><form id="settings-form"><div class="dialog-heading"><h2>AI drafting gateway</h2><button type="button" class="icon-button" data-close="settings-dialog" aria-label="Close settings">×</button></div><p>Core checks work locally. To use a language model, connect a separately hosted, approved gateway. No provider API key belongs in this site.</p><label>Gateway draft endpoint<input id="gateway-url" type="url" placeholder="https://your-approved-gateway.example/draft"></label><label>Gateway access token<input id="gateway-token" type="password" autocomplete="off" placeholder="Session-only access token"></label><p class="hint">Settings stay in memory and clear on reload. Each draft request asks for permission before sending a minimal, aliased finding summary.</p><div class="actions"><button type="button" class="button secondary" id="clear-gateway">Disconnect</button><button class="button primary">Save for this session</button></div></form></dialog>
+  <dialog id="ai-dialog"><div class="dialog-heading"><h2>Send this finding for AI drafting?</h2><button class="icon-button" data-close="ai-dialog" aria-label="Cancel AI request">×</button></div><p id="ai-destination"></p><p>The gateway will receive the control name, current narrative and anonymous evidence aliases. It will forward that summary to its configured model provider. Raw extracts, supplier identifiers, invoice identifiers and amounts are excluded. Review your edited narrative for any details you have added.</p><details><summary>Inspect the exact payload</summary><pre id="ai-payload"></pre></details><p class="hint">AI can draft impact, recommendations and questions. It cannot change the control result, amount, evidence, or review decision.</p><div class="actions"><button class="button secondary" data-close="ai-dialog">Cancel</button><button class="button primary" id="confirm-ai">Send summary for drafting</button></div></dialog>
+  <dialog id="replace-dialog"><div class="dialog-heading"><h2>Replace the current workspace?</h2></div><p>Loading the demo clears the current extracts, findings and review decisions from memory. Download your workpaper first if you need to keep them.</p><div class="actions"><button class="button secondary" data-close="replace-dialog">Keep workspace</button><button class="button primary" id="confirm-reset">Load demo</button></div></dialog>
+  <script type="module" src="./app.mjs"></script>
+</body></html>
