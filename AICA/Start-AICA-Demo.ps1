@@ -66,9 +66,9 @@ try {
         try { $taskChatHealth = $taskChat.Content | ConvertFrom-Json; $taskChatReady = $taskChatHealth.provider -eq 'Compass' -and $taskChatHealth.status -eq 'ok' } catch { }
     }
     if ($taskChatReady) {
-        Write-Host 'AICA demo and Compass chatbot are ready.'
+        Write-Host 'AICA demo and AI Auditor chatbot are ready.'
     } else {
-        Write-Host 'AICA demo is ready. Compass is unavailable; check the server .env settings and port 8781.'
+        Write-Host 'AICA demo is ready. AI Auditor is unavailable; check the server .env settings and port 8781.'
     }
     $taskDraftUrl = 'http://127.0.0.1:8780/health'
     $taskDraft = Get-DemoResponse $taskDraftUrl
@@ -80,7 +80,7 @@ try {
     else { Write-Host 'AI drafting is unavailable; check server .env settings and port 8780.' }
     if (!$NoBrowser) { Start-Process $taskDemoUrl }
     Write-Host "Demo: $taskDemoUrl"
-    Write-Host 'Upload the separate CSV samples from AICA/sample-data, Run audit, then Ask Compass. Background services are reused on the next launch.'
+    Write-Host 'Upload the separate CSV samples from AICA/sample-data, Run audit, then Ask AI Auditor. Background services are reused on the next launch.'
 } catch {
     Write-Host ("Could not open AICA demo: " + $_.Exception.Message) -ForegroundColor Red
     exit 1
