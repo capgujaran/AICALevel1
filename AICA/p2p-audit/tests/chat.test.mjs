@@ -3,11 +3,23 @@ import assert from 'node:assert/strict';
 import {createDemo} from '../site/core/sample.mjs';
 import {runAudit} from '../site/core/agents.mjs';
 import {TOOL_KNOWLEDGE} from '../site/core/knowledge.mjs';
-import {auditSources,browserRetrieval,retrieve,validateChatReply,endpointURL} from '../site/core/rag.mjs';
+import {auditSources,browserRetrieval,retrieve,validateChatReply,endpointURL,needsAuditContext} from '../site/core/rag.mjs';
 import {compassConfig,configuredModels} from '../gateway/compass-config.mjs';
 import {createCompassGateway,validateChatRequest,retrieveForGateway,compassRequest,validateAnswer} from '../gateway/compass.mjs';
 const config={apiKey:'mock-secret',model:'gpt-4.1-mini',origins:['http://127.0.0.1:8773'],mode:'local',token:'mock-gateway-access-token-32-chars-plus'};
 const questionBody=(question='How does the agent framework work?')=>({question,history:[],auditSources:[],runId:null});
+test('Result questions require context while general control questions remain available',()=>{
+  for(const question of ['how many duplicate Invoice are there','How much was overpaid?','Summarize my current audit results.','Explain the selected finding','How many invoices were reviewed?'])assert.equal(needsAuditContext(question),true,question);
+  for(const question of ['How does the agent framework work?','How does the duplicate invoice control work?','How many controls does the tool have?'])assert.equal(needsAuditContext(question),false,question);
+});
+test('Duplicate count retrieval pins actual totals after an unrelated agent question',async()=>{
+  const run=await runAudit(createDemo()),r=browserRetrieval('how many duplicate Invoice are there',{run,includeRun:true,history:['How does the agent framework work?']});
+  assert.equal(r.auditSources[0].id,'run:summary');assert.match(r.auditSources[0].text,/Duplicate invoice 1/);assert.ok(r.auditSources.some(s=>s.kind==='finding'&&s.text.includes('Evidence: 2 source records')));
+});
+test('Gateway returns actionable guidance without a model call for result questions lacking permission',async()=>{
+  let calls=0;const server=createCompassGateway(config,{providerFetch:async()=>{calls++;throw new Error('Should not call provider');}});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  try{const response=await fetch(`http://127.0.0.1:${server.address().port}/chat`,{method:'POST',headers:{Origin:config.origins[0],Authorization:`Bearer ${config.token}`,'Content-Type':'application/json'},body:JSON.stringify(questionBody('how many duplicate Invoice are there'))});assert.equal(response.status,400);assert.match((await response.json()).error,/enable sharing/);assert.equal(calls,0);}finally{await new Promise(resolve=>server.close(resolve));}
+});
 test('BM25 retrieval finds receipt control, aliases and conversation follow-up',()=>{const ranked=retrieve('Why was payment flagged without a GRN?',TOOL_KNOWLEDGE);assert.ok(ranked.some(s=>s.id==='guide:paid_without_receipt'));assert.ok(retrieve('How do agents work?',TOOL_KNOWLEDGE)[0].id==='guide:framework');const follow=retrieve('Tell me more about it',TOOL_KNOWLEDGE,{history:['Why was payment flagged without a GRN?']});assert.ok(follow.some(s=>s.id==='guide:paid_without_receipt'));});
 test('Audit retrieval uses current run amounts, omits raw IDs and excludes sample expectations',async()=>{const data=createDemo(),run=await runAudit(data);run.summary.populationValue=1234500;const r=browserRetrieval('Summarize my current audit results',{run,includeRun:true});assert.equal(r.sources[0].id,'run:summary');assert.ok(!r.sources.some(s=>s.id==='guide:demo'));assert.match(r.sources[0].text,/12,345/);const excerpt=auditSources(run).find(s=>s.kind==='finding');const sent=JSON.stringify({id:excerpt.id,title:excerpt.title,text:excerpt.text,kind:excerpt.kind});assert.ok(!sent.includes('INV-'));assert.ok(!sent.includes('VEN-'));assert.ok(!sent.includes('demo-invoices.csv'));});
 test('Result opt-in is required and selected finding is pinned without sending its raw identity',async()=>{const run=await runAudit(createDemo());assert.equal(browserRetrieval('Explain my findings',{run,includeRun:false}).auditSources.length,0);const selected=run.findings.find(f=>f.controlId==='overpayment');const r=browserRetrieval('Explain the selected finding',{run,includeRun:true,selectedId:selected.id});assert.ok(r.auditSources.some(s=>s.id==='finding:4'));assert.equal(r.auditSources[0].id,'run:summary');});

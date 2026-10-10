@@ -1,4 +1,4 @@
-import {browserRetrieval,endpointURL,validateChatReply} from './core/rag.mjs';
+import {browserRetrieval,endpointURL,validateChatReply,needsAuditContext} from './core/rag.mjs';
 import {escapeHTML as e} from './core/reports.mjs';
 export function attachChat({getWorkspace,navigate,selectFinding}){
   const local=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
@@ -26,6 +26,10 @@ export function attachChat({getWorkspace,navigate,selectFinding}){
     if(form.id!=='compass-question-form'||state.busy)return;
     const question=host.querySelector('#compass-question').value.trim(),w=getWorkspace();if(!question)return;
     if(w.revision!==state.revision){resetContext();host.querySelector('#compass-question').value=question;updatePreview();return;}
+    if(needsAuditContext(question)&&(!w.run||!state.includeRun)){
+      state.error='';state.notice=w.run?'To answer this result question, tick “Allow retrieved audit-result summaries to be sent to Compass for this run,” then click Ask Compass again. Your question has been kept. No request was sent.':'Run the audit first, then allow audit-result summaries to answer this question. No request was sent.';
+      const notice=host.querySelector('.compass-notice');notice.textContent=state.notice;notice.hidden=false;host.querySelector('.compass-error').hidden=true;if(w.run)host.querySelector('#compass-include').focus();return;
+    }
     const r=retrieval(),body={question,history:r.history,auditSources:r.auditSources.map(({id,kind,title,text})=>({id,kind,title,text:text.slice(0,7000)})),runId:state.includeRun?w.run?.operationId??null:null};
     try{if(!state.endpoint)throw new Error('Connect a hosted Compass gateway under Connection. The tool guide and current run will then be available for chat.');const endpoint=endpointURL(state.endpoint);if(!['localhost','127.0.0.1','[::1]'].includes(endpoint.hostname)&&!state.token)throw new Error('Enter a gateway access token under Connection.');if(new TextEncoder().encode(JSON.stringify(body)).length>60000)throw new Error('Retrieved excerpts are too large. Ask about one finding or shorten the narrative.');}
     catch(error){state.error=error.message;host.querySelector('.compass-error').textContent=state.error;host.querySelector('.compass-error').hidden=false;return;}

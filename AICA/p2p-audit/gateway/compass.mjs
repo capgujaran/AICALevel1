@@ -2,7 +2,7 @@ import http from 'node:http';
 import {timingSafeEqual} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {TOOL_KNOWLEDGE} from '../site/core/knowledge.mjs';
-import {retrieve,validateChatReply} from '../site/core/rag.mjs';
+import {retrieve,validateChatReply,needsAuditContext} from '../site/core/rag.mjs';
 import {compassConfig} from './compass-config.mjs';
 export function validateChatRequest(body){
   if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).some(k=>!['question','history','auditSources','runId'].includes(k)))throw new Error('Invalid request.');
@@ -60,6 +60,7 @@ export function createCompassGateway(config,{providerFetch=fetch}={}){
     try{
       let size=0;const chunks=[];for await(const chunk of req){size+=chunk.length;if(size>65000){send(413,{error:'Retrieved context is too large. Shorten the question or narrative.'});return;}chunks.push(chunk);}
       let body;try{body=validateChatRequest(JSON.parse(Buffer.concat(chunks).toString('utf8')));}catch(error){send(400,{error:error.message});return;}
+      if(needsAuditContext(body.question)&&!body.auditSources.length){send(400,{error:'This question needs current audit results. Run the audit and enable sharing retrieved audit-result summaries, then ask again.'});return;}
       const sources=retrieveForGateway(body);if(!sources.length){send(200,{answer:'I can explain the audit tool and retrieved run results. Please ask about an audit control, evidence, review or reporting workflow. [S1]',sources:[{id:'S1',sourceId:TOOL_KNOWLEDGE[0].id,...TOOL_KNOWLEDGE[0],id:'S1'}],provider:'Local scope check',runId:body.runId});return;}
       usage.set(address,count+1);globalCalls++;
       const response=await providerFetch('https://api.core42.ai/v1/chat/completions',{method:'POST',headers:{Authorization:`Bearer ${config.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify(compassRequest(config.model,body,sources)),signal:cancellation.signal});

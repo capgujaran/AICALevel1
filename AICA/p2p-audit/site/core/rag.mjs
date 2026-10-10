@@ -3,6 +3,12 @@ import {money} from './reports.mjs';
 const STOP=new Set('a an the and or of to in is it this that are was be for with by on as do does can me my our please explain tell about how what why which'.split(' '));
 const words=text=>String(text).toLowerCase().match(/[a-z0-9]+/g)?.filter(w=>!STOP.has(w))??[];
 const synonyms={duplicate:['repeated','duplicates'],receipt:['receipts','grn','received','acceptance'],payment:['payments','paid','pay'],invoice:['invoices','bill'],supplier:['suppliers','vendor','vendors'],order:['orders','po'],overpayment:['overpaid','excess'],framework:['agents','agent','planner'],report:['reports','export','workpaper'],privacy:['private','data','compass'],run:['results','result','audit'],value:['amount','amounts','total','totals']};
+export function needsAuditContext(question){
+  const text=String(question);
+  if(/\b(selected|current|my|our|this)\b.*\b(finding|exception|results?|run|audit|invoices?|payments?)\b/i.test(text)||/\b(summarize|summarise|summary)\b.*\b(run|audit|results?|findings?|exceptions?)\b/i.test(text))return true;
+  const resultTerms=/\b(invoices?|payments?|duplicates?|findings?|exceptions?|overpaid|overpayments?|flagged|affected|detected|accepted|dismissed|reviewed)\b/i.test(text);
+  return resultTerms&&(/\b(how many|how much|number of|count|total|are there|were there)\b/i.test(text)||/\b(my|our|current|selected)\b/i.test(text));
+}
 export function retrieve(query,documents,{limit=6,history=[]}={}){
   if(!documents.length)return[];
   const queryWords=words(query),followup=queryWords.length<3||/\b(it|that|those|them|more|why)\b/i.test(query);
@@ -20,7 +26,7 @@ export function auditSources(run,counts={}){
   return [summary,...run.findings.map((f,i)=>({id:`finding:${i+1}`,kind:'finding',title:`Finding ${i+1}: ${f.title}`,view:'exceptions',findingId:f.id,text:`Finding ${i+1} in the current run. Control: ${f.controlId}; title: ${f.title}; provisional risk: ${f.severity}; review decision: ${f.status}. Rule-specific flagged amount: ${money(f.amountCents,f.currency)}, not confirmed loss. Condition: ${f.narrative.condition} Impact: ${f.narrative.impact} Recommendation: ${f.narrative.recommendation} Follow-up questions: ${f.narrative.questions.join(' ')} Evidence: ${f.evidence.length} source records verified as present in the supplied extracts. Narrative origin: ${f.narrativeOrigin}.`}))];
 }
 export function browserRetrieval(question,{run,counts,includeRun=false,selectedId,history=[]}={}){
-  const corpus=includeRun?auditSources(run,counts):[],selected=corpus.find(s=>s.findingId===selectedId),isRunQuestion=/\b(run|results?|findings?|exceptions?|detected|flagged|affected|reviewed|accepted|dismissed|summary)\b/i.test(question)||(/\b(it|this|selected)\b/i.test(question)&&selected);
+  const corpus=includeRun?auditSources(run,counts):[],selected=corpus.find(s=>s.findingId===selectedId),isRunQuestion=needsAuditContext(question)||/\b(run|results?|findings?|exceptions?|detected|flagged|affected|reviewed|accepted|dismissed|summary)\b/i.test(question)||(/\b(it|this|selected)\b/i.test(question)&&selected);
   let ranked=retrieve(question,[...TOOL_KNOWLEDGE,...corpus],{history,limit:7});
   // Current run is authoritative for results; the synthetic sample never answers an uploaded run question.
   if(isRunQuestion)ranked=ranked.filter(s=>s.id!=='guide:demo');
