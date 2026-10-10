@@ -7,6 +7,12 @@ import {attachChat} from './chat-ui.mjs';
 const $=s=>document.querySelector(s);
 const state={view:'overview',data:createDemo(),run:null,events:[],running:false,selected:null,type:'invoices',page:0,search:'',status:'All',tolerance:0,enabled:CONTROLS.map(c=>c.id),engagement:'Purchase-to-payment audit',demo:true,gateway:{url:'',token:''},revision:0};
 let abort,aiAbort,pendingAI,toastTimer,chat;
+function openGatewaySettings(){
+  const local=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+  $('#gateway-url').value=state.gateway.url||(local?'http://127.0.0.1:8780/draft':'');
+  $('#gateway-token').value=state.gateway.token;
+  $('#settings-dialog').showModal();
+}
 const badge=(text,cls='')=>`<span class="badge ${cls}">${e(text)}</span>`;
 const heading=(kicker,title,description)=>`<div class="page-heading"><div><p class="eyebrow">${kicker}</p><h1>${title}</h1><p>${description}</p></div></div>`;
 const finding=()=>state.run?.findings.find(f=>f.id===state.selected);
@@ -44,10 +50,10 @@ document.addEventListener('click',async event=>{const b=event.target.closest('bu
   if(b.dataset.action==='download-data')for(const t of TYPES)download(`${t}.csv`,toCSV(SCHEMAS[t],state.data[t].map(r=>SCHEMAS[t].map(k=>r[k]))),'text/csv');
   if(b.id==='reset-demo')$('#replace-dialog').showModal();
   if(b.id==='confirm-reset'){$('#replace-dialog').close();invalidate();state.data=createDemo();state.demo=true;state.enabled=CONTROLS.map(c=>c.id);state.tolerance=0;state.page=0;render();toast('Synthetic demo loaded.');}
-  if(b.id==='gateway-settings'){$('#gateway-url').value=state.gateway.url;$('#gateway-token').value=state.gateway.token;$('#settings-dialog').showModal();}
+  if(b.id==='gateway-settings'){openGatewaySettings();}
   if(b.id==='clear-gateway'){state.gateway={url:'',token:''};aiAbort?.abort();$('#settings-dialog').close();toast('AI gateway disconnected.');}
   if(b.dataset.action==='save-narrative')saveNarrative();
-  if(b.dataset.action==='ai'){if(!state.gateway.url||!state.gateway.token){$('#settings-dialog').showModal();return;}const f=finding();if(['condition','impact','recommendation'].some(k=>narrative()[k]!==f.narrative[k])){toast('Save your narrative edits before requesting an AI draft.');return;}pendingAI={payload:verifiedAiPayload(f),findingId:f.id,runId:state.run.operationId,revision:state.revision};$('#ai-destination').textContent=`Destination: ${state.gateway.url}`;$('#ai-payload').textContent=JSON.stringify(pendingAI.payload,null,2);$('#ai-dialog').showModal();}
+  if(b.dataset.action==='ai'){if(!state.gateway.url||!state.gateway.token){openGatewaySettings();return;}const f=finding();if(['condition','impact','recommendation'].some(k=>narrative()[k]!==f.narrative[k])){toast('Save your narrative edits before requesting an AI draft.');return;}pendingAI={payload:verifiedAiPayload(f),findingId:f.id,runId:state.run.operationId,revision:state.revision};$('#ai-destination').textContent=`Destination: ${state.gateway.url}`;$('#ai-payload').textContent=JSON.stringify(pendingAI.payload,null,2);$('#ai-dialog').showModal();}
   if(b.id==='confirm-ai'){const request=pendingAI;$('#ai-dialog').close();aiAbort?.abort();aiAbort=new AbortController();const timer=setTimeout(()=>aiAbort.abort(),30000);toast('Requesting AI draft. Existing evidence and decisions remain authoritative.');try{const draft=await requestAiDraft(state.gateway.url,state.gateway.token,request.payload,{signal:aiAbort.signal});if(state.run?.operationId!==request.runId||state.revision!==request.revision)throw new Error('Workspace changed. The stale AI draft was discarded.');const f=state.run.findings.find(f=>f.id===request.findingId);updateFinding({...f,narrative:{...f.narrative,impact:draft.impact,recommendation:draft.recommendation,questions:draft.questions},status:'Pending',review:null,narrativeOrigin:'AI gateway draft'});toast('AI draft applied. Check its accuracy and record a new review decision.');}finally{clearTimeout(timer);}}
   if(b.dataset.export){const kind=b.dataset.export;if(kind==='csv')download('aica-exceptions.csv',reportCSV(state.run),'text/csv');else if(kind==='json')download('aica-workpaper.json',JSON.stringify({version:1,engagement:state.engagement,population:exportPopulation(state.data),sourceRecords:state.data,run:state.run},null,2),'application/json');else download(`aica-${kind}-report.html`,buildReport(state.run,{engagement:state.engagement,reviewedOnly:kind==='reviewed'}),'text/html');}
 }catch(error){toast(error.name==='AbortError'?'Request stopped. No AI draft applied.':error.message);}});
