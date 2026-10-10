@@ -76,6 +76,16 @@ Live model calls were not used for validation. Gateway tests use a mocked provid
 
 References: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses), [Responses migration and storage](https://developers.openai.com/api/docs/guides/migrate-to-responses).
 
+## Compass RAG chatbot
+
+The **Ask Compass** panel retrieves tool-guide passages and, after explicit opt-in, excerpts from the current audit run. It uses BM25 keyword retrieval with audit vocabulary aliases. The separate Compass gateway retrieves the guide from its own corpus and uses Core42 chat completions to produce source-cited, read-only explanations. It checks citation references and numeric tokens; professional review is still required for semantic accuracy. Questions and manually edited narratives must be checked for sensitive details before sending.
+
+From this original workspace, run `npm run compass` to load the existing KU `.env` Compass settings into server memory. No credential is copied into the browser or published source. The local chatbot connects to `http://127.0.0.1:8781/chat`. For a public Pages chatbot, host the separate gateway using [the hosting instructions](deployment/compass-hosting.md), then enter its HTTPS URL and gateway access token under Connection. The token stays in tab memory. Conversations are cleared when the run or review context changes, and pending stale replies are discarded. Compass chat does not modify evidence, results or review decisions.
+
+The public chat gateway URL is initially blank in `site/chat-config.json`. The frontend alone cannot run model calls or access a local `.env`; provider credentials and the gateway must be deployed separately. Docker deployment is provided. The gateway permits no automatic provider retries or fallback and has request, context and concurrency limits.
+
+Live synthetic Compass checks verified both a tool-guide explanation and a current-run summary using the configured model. Legacy optional narrative drafting remains a separate OpenAI gateway component; choosing Compass chat does not silently route calls to it.
+
 ## GitHub Pages deployment, when ready
 
 ```powershell
@@ -85,7 +95,7 @@ npm run build
 
 `dist/` contains only the static application and synthetic demo. Relative asset/module URLs support a repository subpath. `.nojekyll` is included. No originals, course deck, gateway server, credentials, imported evidence or test fixtures are copied. Imported evidence lives in browser memory, and downloaded workpapers must be kept outside public publication paths.
 
-A manual deployment workflow template is supplied at `deployment/github-pages.yml`. The repository also has an active copy at `.github/workflows/aica-pages.yml` that deploys on pushes to main. To activate later, copy it to `.github/workflows/aica-pages.yml`, select GitHub Actions as the Pages source, and run its manual workflow. The template assumes this repository layout (`AICA/p2p-audit`); update the two working-directory paths and artifact path if moving the tool to a separate repository. Publishing would replace this repository's Pages site, so use a dedicated repository if it already hosts something else. Ensure the repository and publication permissions are appropriate before making the source public.
+A manual deployment workflow template is supplied at `deployment/github-pages.yml`. The repository also has an active workflow at `.github/workflows/aica-pages.yml` deploying on pushes to main. To activate later, copy it to `.github/workflows/aica-pages.yml`, select GitHub Actions as the Pages source, and run its manual workflow. The template assumes this repository layout (`AICA/p2p-audit`); update the two working-directory paths and artifact path if moving the tool to a separate repository. Publishing would replace this repository's Pages site, so use a dedicated repository if it already hosts something else. Ensure the repository and publication permissions are appropriate before making the source public.
 
 The workflow tests and builds the app, uploads only `AICA/p2p-audit/dist`, and deploys that artifact. GitHub Pages hosts the static frontend; the optional gateway needs separate hosting. See [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
 

@@ -9,8 +9,11 @@ A Day 3 group-project prototype using the AICA course's navy and magenta palette
 - Five seeded demo exceptions, linked source rows and named reviewer decisions.
 - Draft and accepted-findings HTML reports, decisions CSV and evidence JSON exports.
 - A six-minute, four-presenter demonstration guide.
+- A Compass RAG chatbot with retrieved guide/run excerpts, source citations and links back to the findings.
 
 The core workflow runs in the browser without an API key. Uploaded extracts stay in tab memory, and reload clears the workspace. Optional model drafting needs a separately hosted, approved gateway; each request previews the exact summary before sending. Do not enter provider API keys in this public frontend.
+
+**Compass chat:** the interface is included on the public site. Public model answers require a separately hosted Compass gateway; its URL is initially unconfigured. See [Compass hosting instructions](AICA/p2p-audit/deployment/compass-hosting.md) and the supplied Dockerfile. The local gateway can use the existing KU Compass configuration. Provider credentials stay server-side; users enter only a gateway access token. Opt in to send retrieved result summaries for the current run, inspect the excerpts and ask your question. Conversations reset when the audit context changes.
 
 ## Use the demo
 

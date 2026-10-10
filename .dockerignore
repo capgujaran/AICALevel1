@@ -1,0 +1,12 @@
+**
+!AICA/
+!AICA/p2p-audit/
+!AICA/p2p-audit/site/
+!AICA/p2p-audit/site/**
+!AICA/p2p-audit/gateway/
+!AICA/p2p-audit/gateway/**
+!AICA/p2p-audit/deployment/
+!AICA/p2p-audit/deployment/compass.Dockerfile
+**/.env
+**/.env.*
+**/node_modules/

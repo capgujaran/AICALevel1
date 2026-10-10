@@ -3,9 +3,10 @@ import {createDemo,DEMO_EXPECTED} from './core/sample.mjs';
 import {CONTROLS} from './core/engine.mjs';
 import {AGENTS,runAudit,reviewFinding,verifiedAiPayload,requestAiDraft} from './core/agents.mjs';
 import {escapeHTML as e,money,reportCSV,buildReport} from './core/reports.mjs';
+import {attachChat} from './chat-ui.mjs';
 const $=s=>document.querySelector(s);
 const state={view:'overview',data:createDemo(),run:null,events:[],running:false,selected:null,type:'invoices',page:0,search:'',status:'All',tolerance:0,enabled:CONTROLS.map(c=>c.id),engagement:'Purchase-to-payment audit',demo:true,gateway:{url:'',token:''},revision:0};
-let abort,aiAbort,pendingAI,toastTimer;
+let abort,aiAbort,pendingAI,toastTimer,chat;
 const badge=(text,cls='')=>`<span class="badge ${cls}">${e(text)}</span>`;
 const heading=(kicker,title,description)=>`<div class="page-heading"><div><p class="eyebrow">${kicker}</p><h1>${title}</h1><p>${description}</p></div></div>`;
 const finding=()=>state.run?.findings.find(f=>f.id===state.selected);
@@ -24,12 +25,12 @@ function guide(){const found=new Set(state.run?.findings.map(f=>f.controlId)??[]
 const views={overview,evidence,exceptions,agents,report,guide};
 function render(){ $('#content').innerHTML=views[state.view]();document.querySelectorAll('.sidebar [data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);if(b.dataset.view===state.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});$('#nav-count').textContent=state.run?.findings.length??0;$('#dataset-label').textContent=state.demo?'Synthetic demonstration':'Imported working population';$('#run-top').disabled=state.running;$('#reset-demo').disabled=state.running;$('#stop-run').hidden=!state.running;document.querySelectorAll('[data-action="run"]').forEach(b=>b.disabled=state.running);}
 function toast(message){clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,6500);}
-function invalidate(){state.revision++;aiAbort?.abort();state.run=null;state.selected=null;state.events=[];}
+function invalidate(){state.revision++;aiAbort?.abort();state.run=null;state.selected=null;state.events=[];chat?.invalidateContext();}
 function download(name,text,type){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function navigate(view){if(!views[view])return;state.view=view;location.hash=view;render();$('#content').focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});}
-async function execute(){if(state.running)return;invalidate();state.running=true;abort=new AbortController();render();toast('Audit started. Follow the tool trace in Agent framework.');try{const result=await runAudit(state.data,{toleranceCents:state.tolerance,enabledControls:state.enabled},{signal:abort.signal,onEvent:event=>{const i=state.events.findIndex(r=>r.step===event.step);if(i<0)state.events.push(event);else state.events[i]=event;if(state.view==='agents')$('#trace').innerHTML=trace();}});state.run=result;state.selected=result.findings[0]?.id??null;toast(`Audit complete: ${result.findings.length} exceptions verified for review.`);}catch(error){toast(error.message);}finally{state.running=false;render();}}
+async function execute(){if(state.running)return;invalidate();state.running=true;abort=new AbortController();render();toast('Audit started. Follow the tool trace in Agent framework.');try{const result=await runAudit(state.data,{toleranceCents:state.tolerance,enabledControls:state.enabled},{signal:abort.signal,onEvent:event=>{const i=state.events.findIndex(r=>r.step===event.step);if(i<0)state.events.push(event);else state.events[i]=event;if(state.view==='agents')$('#trace').innerHTML=trace();}});state.run=result;state.selected=result.findings[0]?.id??null;chat?.invalidateContext('Audit complete. You can now enable result summaries for this run.');toast(`Audit complete: ${result.findings.length} exceptions verified for review.`);}catch(error){toast(error.message);}finally{state.running=false;render();}}
 function narrative(){const form=$('#review-form');return Object.fromEntries(['condition','impact','recommendation'].map(k=>[k,form.elements[k].value.trim()]));}
-function updateFinding(updated){const i=state.run.findings.findIndex(f=>f.id===updated.id);state.run.findings[i]=updated;state.revision++;render();}
+function updateFinding(updated){const i=state.run.findings.findIndex(f=>f.id===updated.id);state.run.findings[i]=updated;state.revision++;chat?.invalidateContext('Review context changed. Ask again using the updated findings.');render();}
 function saveNarrative(){const f=finding(),n=narrative();if(Object.values(n).some(v=>!v))throw new Error('Complete each narrative field.');updateFinding({...f,narrative:{...f.narrative,...n},status:'Pending',review:null,narrativeOrigin:'Auditor edited'});toast('Draft saved. Review decision is pending.');}
 document.addEventListener('click',async event=>{const b=event.target.closest('button,[data-view]');if(!b)return;try{
   if(b.dataset.view)navigate(b.dataset.view);
@@ -56,3 +57,4 @@ $('#settings-form').addEventListener('submit',event=>{event.preventDefault();try
 document.addEventListener('submit',event=>{if(event.target.id!=='review-form')return;event.preventDefault();try{const form=event.target;updateFinding(reviewFinding(finding(),{decision:form.elements.decision.value,reviewer:form.elements.reviewer.value,note:form.elements.note.value,narrative:narrative()}));toast('Review decision recorded.');}catch(error){toast(error.message);}});
 window.addEventListener('hashchange',()=>{const view=location.hash.slice(1);if(views[view]&&view!==state.view){state.view=view;render();}});
 if(views[location.hash.slice(1)])state.view=location.hash.slice(1);render();
+chat=attachChat({getWorkspace:()=>({run:state.run,revision:state.revision,selectedId:state.selected,counts:Object.fromEntries(TYPES.map(t=>[t,state.data[t].length]))}),navigate,selectFinding:id=>{state.selected=id;navigate('exceptions');}});
