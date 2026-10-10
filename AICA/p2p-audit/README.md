@@ -12,7 +12,7 @@ npm test
 npm run serve
 ```
 
-Open http://127.0.0.1:8773. The server exposes only `site/`. For a different local port, set `$env:PORT` before running it. Reload clears working records, reviews and gateway settings. Run the audit, inspect evidence under Exceptions, record a named decision, then export under Review & report. The Demo guide contains a six-minute, four-presenter walkthrough.
+Open http://127.0.0.1:8773. The server exposes only `site/`. For a different local port, set `$env:PORT` before running it. Reload clears working records, reviews and gateway settings. The workspace starts empty. Download the separate sample CSV files from Evidence room, upload each to its matching extract, then run the audit. Inspect evidence under Exceptions, record a named decision, then export under Review & report. The Demo guide contains a six-minute, four-presenter walkthrough.
 
 The supplied demonstration has 30 invoice records, 29 purchase orders, 28 receipts and 29 payments. Expected results: five exceptions, six distinct affected invoice records, AED 48,000 invoice population and AED 8,850 distinct affected invoice value. This value is associated with exceptions, not a confirmed loss.
 
@@ -102,3 +102,7 @@ The workflow tests and builds the app, uploads only `AICA/p2p-audit/dist`, and d
 ## Practical limits
 
 PO-level receipt presence does not verify quantities, line-item matching, dates relative to payment or service quality. Duplicate detection normalizes supplier invoice numbers, and can generate legitimate repeats. Extraction coverage must be assessed by the reviewer. No approval workflow, bank details, sanctions, tax or fraud conclusion is inferred. Reviewer names are entered by the user and are not authenticated identities. Reload clears the workspace; the downloaded JSON is an evidence export, not a re-importable application session. Use synthetic data for the public group demo.
+
+### Empty workspace and sample files
+
+No sample population loads automatically. Record counts and invoice values appear only after upload; findings appear only after Run audit. Reload and Clear workspace remove the working population. Separate synthetic CSVs are available under `site/samples/` and through Sample CSV links in Evidence room. In the original workspace, copies are also in `AICA/sample-data/`. Upload all four files to reproduce the complete demo.
