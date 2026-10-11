@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="12" fill="#92278f"/><path d="M12 33 24 12l12 21h-8l-4-7-4 7Z" fill="white"/><path d="m29 13 7-4 1 8" fill="none" stroke="#dac6eb" stroke-width="2"/><circle cx="24" cy="37" r="2" fill="#dac6eb"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="P2P Audit Lab logo">
+  <rect width="64" height="64" rx="15" fill="#012060"/>
+  <path d="M0 15A15 15 0 0 1 15 0h34a15 15 0 0 1 15 15v4H0Z" fill="#7030a0"/>
+  <text x="32" y="37" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="25" font-weight="800" letter-spacing="-1.5">P2P</text>
+  <path d="M14 49h36" stroke="#a88bc8" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="14" cy="49" r="3" fill="#dac6eb"/><circle cx="50" cy="49" r="3" fill="#dac6eb"/>
+  <circle cx="32" cy="49" r="9" fill="#92278f"/>
+  <path d="m28 49 2.6 2.8 5.6-6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

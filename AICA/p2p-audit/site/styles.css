@@ -15,3 +15,13 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;colo
 @media(max-width:1200px){.stat{padding:18px}.stat>strong{font-size:21px}.node-1,.node-3{left:3%}.node-2,.node-4{right:3%}.orbit-node{font-size:10px;padding:10px}.guide-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:960px){.guide-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.stat{padding:16px}.stat>strong{font-size:19px}.field-row,.guide-grid{grid-template-columns:1fr}.panel,.exception-detail{padding:20px}.filters label{width:100%}.filters select{max-width:none}.detail-heading{align-items:flex-start}.detail-metrics{gap:20px}.detail-metrics strong{font-size:18px}.file-card .button{font-size:10px;padding:8px}.evidence-entry dl>div{grid-template-columns:100px 1fr}.trace-row small{display:block}}
+
+/* Presentation stopwatch stays independent of audit runs and workspace changes. */
+.topbar{position:sticky;top:0;z-index:20;min-height:78px;height:auto;gap:18px;padding-top:12px;padding-bottom:12px}
+.presentation-timer{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#faf7fc;flex-shrink:0}
+.timer-label{display:flex;flex-direction:column;gap:3px}.timer-label>span{color:var(--navy);font-size:11px;font-weight:650}.timer-label small{font-size:10px;color:var(--muted)}
+.presentation-timer output{font-size:25px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:1px;line-height:1;color:var(--navy);min-width:75px}
+.presentation-timer[data-running="true"] output{color:var(--purple)}
+.timer-reset{border:0;background:transparent;padding:6px 2px;font-size:11px;color:var(--muted)}.timer-reset:hover{color:var(--purple)}
+@media(max-width:1050px){.topbar{flex-wrap:wrap}.presentation-timer{order:3;margin:0 auto}.top-actions{margin-left:auto}}
+@media(max-width:600px){.presentation-timer{width:100%;justify-content:center;gap:12px}.topbar{gap:10px}}

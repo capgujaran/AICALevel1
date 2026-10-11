@@ -10,7 +10,7 @@ test('Branded report charts preserve accepted-only scope and distinguish full-ru
   run.findings[0]=reviewFinding(run.findings[0],{decision:'Accepted',reviewer:'Demo reviewer',note:'Checked synthetic evidence.'});
   run.findings[1]=reviewFinding(run.findings[1],{decision:'Dismissed',reviewer:'Demo reviewer',note:'Illustrative dismissal.'});
   const html=buildReport(run,{reviewedOnly:true,engagement:'<Audit & report>'});
-  assert.match(html,/AICA Audit Lab logo/);
+  assert.match(html,/P2P Audit Lab logo/);
   assert.match(html,/Pending: 3; Accepted: 1; Dismissed: 1; Needs evidence: 0/);
   assert.match(html,/1 included \/ 5 full-run findings/);
   assert.match(html,/6 affected invoice records; 24 other invoice records/);

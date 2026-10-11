@@ -2,23 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="AICA purchase-to-payment audit lab: evidence-linked exceptions, a visible agent workflow and human-reviewed reporting.">
-  <meta name="theme-color" content="#012060"><title>AICA · Purchase-to-payment Audit Lab</title>
+  <meta name="description" content="P2P Audit Lab: evidence-linked exceptions, a visible agent workflow and human-reviewed reporting.">
+  <meta name="theme-color" content="#012060"><title>P2P Audit Lab</title>
   <link rel="icon" href="./assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./chat.css">
 </head>
 <body>
   <a class="skip" href="#content">Skip to workspace</a>
   <aside class="sidebar">
-    <a class="brand" href="#overview" aria-label="AICA Audit Lab home"><img src="./assets/mark.svg" alt="" width="42" height="42"><span><strong>AICA</strong><small>Audit Lab</small></span></a>
+    <a class="brand" href="#overview" aria-label="P2P Audit Lab home"><img src="./assets/mark.svg" alt="" width="42" height="42"><span><strong>P2P</strong><small>Audit Lab</small></span></a>
     <p class="sidebar-intro">Purchase to payment<br><span>Day 3 group project</span></p>
     <nav aria-label="Workspace"><button data-view="overview" class="active">Overview</button><button data-view="evidence">Evidence room</button><button data-view="exceptions">Exceptions <span id="nav-count"></span></button><button data-view="agents">Agent framework</button><button data-view="report">Review & report</button><button data-view="guide">Demo guide</button></nav>
     <div class="sidebar-bottom"><span class="local-dot"></span><strong>Local workspace</strong><p>Core checks stay in your browser.<br>Uploads are held in memory.</p><button class="text-button" id="gateway-settings">Configure AI drafting</button></div>
     <div class="course-strip">AI in ICAI <span>Level 1</span></div>
   </aside>
   <div class="workspace">
-    <header class="topbar"><div><span class="breadcrumb">AICA / Audit Lab</span><span id="dataset-label" class="dataset-label">No files uploaded</span></div><div class="top-actions"><button class="button secondary small" id="reset-demo">Clear workspace</button><button class="button primary small" id="run-top" disabled>Run audit <span aria-hidden="true">↗</span></button><button class="button danger small" id="stop-run" hidden>Stop audit</button></div></header>
+    <header class="topbar"><div><span class="breadcrumb">P2P / Audit Lab</span><span id="dataset-label" class="dataset-label">No files uploaded</span></div><section id="presentation-timer" class="presentation-timer" aria-label="Presentation timer"><div class="timer-label"><span>Demo timer</span><small data-timer-status role="status">Ready</small></div><output data-timer-display role="timer" aria-label="Elapsed presentation time" aria-live="off">00:00</output><button type="button" class="button primary small" data-timer-toggle aria-label="Start presentation timer">Start</button><button type="button" class="timer-reset" data-timer-reset aria-label="Reset presentation timer">Reset</button></section><div class="top-actions"><button class="button secondary small" id="reset-demo">Clear workspace</button><button class="button primary small" id="run-top" disabled>Run audit <span aria-hidden="true">↗</span></button><button class="button danger small" id="stop-run" hidden>Stop audit</button></div></header>
     <main id="content" tabindex="-1"></main>
-    <footer class="workspace-footer"><span>AICA-themed learning prototype</span><span>Evidence first. Human judgment always.</span></footer>
+    <footer class="workspace-footer"><span>P2P Audit Lab · Learning prototype</span><span>Evidence first. Human judgment always.</span></footer>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <dialog id="settings-dialog"><form id="settings-form"><div class="dialog-heading"><h2>AI drafting gateway</h2><button type="button" class="icon-button" data-close="settings-dialog" aria-label="Close settings">×</button></div><p>Core checks work locally. To use a language model, connect a separately hosted, approved gateway. Provider credentials are read on the server from .env. Leave the token blank for the default local demo; hosted gateways require an access token.</p><label>Gateway draft endpoint<input id="gateway-url" type="url" placeholder="https://your-approved-gateway.example/draft"></label><label>Gateway access token<input id="gateway-token" type="password" autocomplete="off" placeholder="Optional for local demo; required for hosted gateway"></label><p class="hint">Access tokens stay in memory and clear on reload. The local gateway URL is filled automatically. Each draft request asks for permission before sending a minimal, aliased finding summary.</p><div class="actions"><button type="button" class="button secondary" id="clear-gateway">Disconnect</button><button class="button primary">Save for this session</button></div></form></dialog>

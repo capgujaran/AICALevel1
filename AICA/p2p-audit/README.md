@@ -7,7 +7,7 @@ A standalone Day 3 group-project prototype inspired by KU Internal Audit's sourc
 Node.js 22.8 or later. No npm packages or API key are needed for the core app.
 
 ```powershell
-cd AICA/p2p-audit
+cd C:\Users\ku1422\Documents\Github\KUAuditAssistantV2\AICA\p2p-audit
 npm test
 npm run serve
 ```
@@ -83,7 +83,7 @@ npm run build
 
 `dist/` contains only the static application and synthetic demo. Relative asset/module URLs support a repository subpath. `.nojekyll` is included. No originals, course deck, gateway server, credentials, imported evidence or test fixtures are copied. Imported evidence lives in browser memory, and downloaded workpapers must be kept outside public publication paths.
 
-A manual deployment workflow template is supplied at `deployment/github-pages.yml`. The repository also has an active workflow at `.github/workflows/aica-pages.yml` deploying on pushes to main. To activate later, copy it to `.github/workflows/aica-pages.yml`, select GitHub Actions as the Pages source, and run its manual workflow. The template assumes this repository layout (`AICA/p2p-audit`); update the two working-directory paths and artifact path if moving the tool to a separate repository. Publishing would replace this repository's Pages site, so use a dedicated repository if it already hosts something else. Ensure the repository and publication permissions are appropriate before making the source public.
+A manual deployment workflow template is supplied at `deployment/github-pages.yml`. It has **not** been installed in the repository workflows or deployed. To activate later, copy it to `.github/workflows/aica-pages.yml`, select GitHub Actions as the Pages source, and run its manual workflow. The template assumes this repository layout (`AICA/p2p-audit`); update the two working-directory paths and artifact path if moving the tool to a separate repository. Publishing would replace this repository's Pages site, so use a dedicated repository if it already hosts something else. Ensure the repository and publication permissions are appropriate before making the source public.
 
 The workflow tests and builds the app, uploads only `AICA/p2p-audit/dist`, and deploys that artifact. GitHub Pages hosts the static frontend; the optional gateway needs separate hosting. See [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
 
